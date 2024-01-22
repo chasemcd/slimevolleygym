@@ -6,7 +6,7 @@ setuptools.setup(
     description="Port of David Ha's Slime volleyball for gymnasium.",
     author="Chase McDonald",
     author_email="chasemcd@andrew.cmu.edu",
-    packages=["slime_volleyball"],  # same as name
+    packages=setuptools.find_packages(),
     install_requires=[
         "numpy",
         "gymnasium",
