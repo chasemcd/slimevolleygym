@@ -30,18 +30,30 @@ class Agent:
     def lives(self):
         return self.life
 
+    def standardize_action(self, action):
+        # swap forward and backward depending on dir
+        if self.dir == 1:
+            return action
+
+        return [action[1], action[0], action[2]]
+
     def set_action(self, action):
+        action = self.standardize_action(action)
+
         forward = False
         backward = False
         jump = False
+
         if action[0] > 0:
             forward = True
         if action[1] > 0:
             backward = True
         if action[2] > 0:
             jump = True
+
         self.desired_vx = 0
         self.desired_vy = 0
+
         if forward and (not backward):
             self.desired_vx = -constants.PLAYER_SPEED_X
         if backward and (not forward):
@@ -63,7 +75,7 @@ class Agent:
         if self.y <= constants.REF_U + constants.NUDGE * constants.TIMESTEP:
             self.vy = self.desired_vy
 
-        self.vx = self.desired_vx  # * self.dir, uncomment to get bot to work
+        self.vx = self.desired_vx * self.dir
 
         self.move()
 
