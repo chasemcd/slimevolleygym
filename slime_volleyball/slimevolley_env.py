@@ -12,7 +12,6 @@ https://github.com/hardmaru/neuralslimevolley
 No dependencies apart from Numpy and Gym
 """
 
-import math
 import typing
 
 import gymnasium as gym
@@ -20,7 +19,6 @@ from gymnasium import spaces
 from gymnasium.envs.registration import register
 import numpy as np
 import cv2  # installed with gym anyways
-
 
 
 from slime_volleyball.core import constants
@@ -78,9 +76,11 @@ class SlimeVolleyEnv(gym.Env):
         [0, 1, 0],  # RIGHT (backward)
     ]
 
-    from_pixels = False
-    survival_bonus = False  # Depreciated: augment reward, easier to train
-    multiagent = False  # optional args anyways
+    default_config = {
+        "from_pixels": False,
+        "survival_bonus": False,
+        "max_steps": 3000,
+    }
 
     def __init__(self, config: dict[str, typing.Any] | None = None):
         super(SlimeVolleyEnv, self).__init__()
@@ -103,13 +103,17 @@ class SlimeVolleyEnv(gym.Env):
         of 84, since usual atari wrappers downsample to 84x84
         """
         if config is None:
-            config = {}
+            config = self.default_config
 
         self.agent_ids = ["agent_left", "agent_right"]
         self.t = 0
         self.max_steps = config.get("max_steps", 3000)
+        self.from_pixels = config.get("from_pixels", self.default_config["from_pixels"])
+        self.survival_bonus = config.get(
+            "survival_bonus", self.default_config["survival_bonus"]
+        )
 
-        self.action_space = spaces.Discrete(6)
+        self.action_space = spaces.Discrete(len(self.action_table))
 
         if self.from_pixels:
             constants.setPixelObsMode()
@@ -239,8 +243,8 @@ class SlimeVolleyEnv(gym.Env):
         self.game.reset()
 
     def reset(
-        self, seed: int | None = None, options: dict[str, ...] | None = None
-    ) -> tuple[dict[str, ...], dict[..., ...]]:
+        self, seed: int | None = None, options: dict[str, typing.Any] | None = None
+    ) -> tuple[dict[str, np.array], dict[str, typing.Any]]:
         self.init_game_state()
         return self.get_obs(), {}
 

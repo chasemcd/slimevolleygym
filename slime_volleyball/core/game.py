@@ -1,13 +1,13 @@
 import numpy as np
 
-from examples.slime_volleyball.slime_volleyball.core import constants
-from examples.slime_volleyball.slime_volleyball.core.objects import (
+from slime_volleyball.core import constants
+from slime_volleyball.core.objects import (
     Wall,
     Particle,
     create_canvas,
 )
-from examples.slime_volleyball.slime_volleyball.core.agent import Agent
-from examples.slime_volleyball.slime_volleyball.core import utils
+from slime_volleyball.core.agent import Agent
+from slime_volleyball.core import utils
 
 
 class SlimeVolleyGame:

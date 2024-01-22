@@ -3,9 +3,9 @@ import math
 import cv2
 import numpy as np
 
-from examples.slime_volleyball.slime_volleyball.core import constants
-from examples.slime_volleyball.slime_volleyball import rendering
-from examples.slime_volleyball.slime_volleyball.core import utils
+from slime_volleyball.core import constants
+from slime_volleyball import rendering
+from slime_volleyball.core import utils
 
 
 def make_half_circle(radius=10, res=20, filled=True):
