@@ -14,7 +14,7 @@ FRICTION = 1.0  # 1 means no FRICTION, less means FRICTION
 INIT_DELAY_FRAMES = 30
 GRAVITY = -9.8 * 1.5 * 1.5  # -9.8 * 2 * 1.5
 
-MAXLIVES = 5  # game ends when one agent loses this many games
+MAXLIVES = 1  # game ends when one agent loses this many games
 
 WINDOW_WIDTH = 1200
 WINDOW_HEIGHT = 500
@@ -23,8 +23,11 @@ FACTOR = WINDOW_WIDTH / REF_W
 
 # if set to true, renders using cv2 directly on numpy array
 # (otherwise uses pyglet / opengl -> much smoother for human player)
-PIXEL_MODE = False
-PIXEL_SCALE = 4  # first render at multiple of Pixel Obs resolution, then downscale. Looks better.
+PIXEL_MODE = True
+PIXEL_MODE = True
+PIXEL_SCALE = (
+    4  # first render at multiple of Pixel Obs resolution, then downscale. Looks better.
+)
 
 PIXEL_WIDTH = 84 * 2 * 1
 PIXEL_HEIGHT = 84 * 1

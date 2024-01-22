@@ -1,8 +1,12 @@
 import math
 
-from envs.slime_volleyball.core.objects import RelativeState, half_circle, circle
-from envs.slime_volleyball.core import constants
-from envs.slime_volleyball.core import utils
+from slime_volleyball.core.objects import (
+    RelativeState,
+    half_circle,
+    circle,
+)
+from slime_volleyball.core import constants
+from slime_volleyball.core import utils
 
 
 class Agent:
@@ -108,7 +112,9 @@ class Agent:
         eyeX = 0
         eyeY = 0
 
-        canvas = half_circle(canvas, utils.toX(x), utils.toY(y), utils.toP(r), color=self.c)
+        canvas = half_circle(
+            canvas, utils.toX(x), utils.toY(y), utils.toP(r), color=self.c
+        )
 
         # track ball with eyes (replace with observed info later):
         c = math.cos(angle)

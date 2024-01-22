@@ -1,18 +1,25 @@
 import cv2
 
-from envs.slime_volleyball.core import constants
+from slime_volleyball.core import constants
 
 
 def upsize_image(img):
     return cv2.resize(
         img,
-        (constants.PIXEL_WIDTH * constants.PIXEL_SCALE, constants.PIXEL_HEIGHT * constants.PIXEL_SCALE),
+        (
+            constants.PIXEL_WIDTH * constants.PIXEL_SCALE,
+            constants.PIXEL_HEIGHT * constants.PIXEL_SCALE,
+        ),
         interpolation=cv2.INTER_NEAREST,
     )
 
 
 def downsize_image(img):
-    return cv2.resize(img, (constants.PIXEL_WIDTH, constants.PIXEL_HEIGHT), interpolation=cv2.INTER_AREA)
+    return cv2.resize(
+        img,
+        (constants.PIXEL_WIDTH, constants.PIXEL_HEIGHT),
+        interpolation=cv2.INTER_AREA,
+    )
 
 
 # conversion from space to pixels (allows us to render to diff resolutions)

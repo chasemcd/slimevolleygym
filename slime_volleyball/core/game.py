@@ -1,9 +1,13 @@
 import numpy as np
 
-from envs.slime_volleyball.core import constants
-from envs.slime_volleyball.core.objects import Wall, Particle, create_canvas
-from envs.slime_volleyball.core.agent import Agent
-from envs.slime_volleyball.core import utils
+from examples.slime_volleyball.slime_volleyball.core import constants
+from examples.slime_volleyball.slime_volleyball.core.objects import (
+    Wall,
+    Particle,
+    create_canvas,
+)
+from examples.slime_volleyball.slime_volleyball.core.agent import Agent
+from examples.slime_volleyball.slime_volleyball.core import utils
 
 
 class SlimeVolleyGame:
@@ -24,7 +28,9 @@ class SlimeVolleyGame:
         self.reset()
 
     def reset(self):
-        self.ground = Wall(0, 0.75, constants.REF_W, constants.REF_U, c=constants.GROUND_COLOR)
+        self.ground = Wall(
+            0, 0.75, constants.REF_W, constants.REF_U, c=constants.GROUND_COLOR
+        )
         self.fence = Wall(
             0,
             0.75 + constants.REF_WALL_HEIGHT / 2,
@@ -33,13 +39,24 @@ class SlimeVolleyGame:
             c=constants.FENCE_COLOR,
         )
         self.fence_stub = Particle(
-            0, constants.REF_WALL_HEIGHT, 0, 0, constants.REF_WALL_WIDTH / 2, c=constants.FENCE_COLOR
+            0,
+            constants.REF_WALL_HEIGHT,
+            0,
+            0,
+            constants.REF_WALL_WIDTH / 2,
+            c=constants.FENCE_COLOR,
         )
         ball_vx = self.np_random.uniform(low=-20, high=20)
         ball_vy = self.np_random.uniform(low=10, high=25)
-        self.ball = Particle(0, constants.REF_W / 4, ball_vx, ball_vy, 0.5, c=constants.BALL_COLOR)
-        self.agent_left = Agent(-1, -constants.REF_W / 4, 1.5, c=constants.AGENT_LEFT_COLOR)
-        self.agent_right = Agent(1, constants.REF_W / 4, 1.5, c=constants.AGENT_RIGHT_COLOR)
+        self.ball = Particle(
+            0, constants.REF_W / 4, ball_vx, ball_vy, 0.5, c=constants.BALL_COLOR
+        )
+        self.agent_left = Agent(
+            -1, -constants.REF_W / 4, 1.5, c=constants.AGENT_LEFT_COLOR
+        )
+        self.agent_right = Agent(
+            1, constants.REF_W / 4, 1.5, c=constants.AGENT_RIGHT_COLOR
+        )
         self.agent_left.update_state(self.ball, self.agent_right)
         self.agent_right.update_state(self.ball, self.agent_left)
         self.delay_screen = utils.DelayScreen()
@@ -47,7 +64,9 @@ class SlimeVolleyGame:
     def new_match(self):
         ball_vx = self.np_random.uniform(low=-20, high=20)
         ball_vy = self.np_random.uniform(low=10, high=25)
-        self.ball = Particle(0, constants.REF_W / 4, ball_vx, ball_vy, 0.5, c=constants.BALL_COLOR)
+        self.ball = Particle(
+            0, constants.REF_W / 4, ball_vx, ball_vy, 0.5, c=constants.BALL_COLOR
+        )
         self.delay_screen.reset()
 
     def step(self):
@@ -56,7 +75,6 @@ class SlimeVolleyGame:
         self.between_game_control()
         self.agent_left.update()
         self.agent_right.update()
-
         if self.delay_screen.status():
             self.ball.apply_acceleration(0, constants.GRAVITY)
             self.ball.limit_speed(0, constants.MAX_BALL_SPEED)

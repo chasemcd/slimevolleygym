@@ -13,20 +13,21 @@ No dependencies apart from Numpy and Gym
 """
 
 import math
+import typing
+
 import gymnasium as gym
 from gymnasium import spaces
 from gymnasium.envs.registration import register
 import numpy as np
 import cv2  # installed with gym anyways
 
-from ray.rllib import env
 
 
-from envs.slime_volleyball.core import constants
-from envs.slime_volleyball.core import game
-from envs.slime_volleyball import rendering
-from envs.slime_volleyball.baseline_policy import BaselinePolicy
-from envs.slime_volleyball.core import utils
+from slime_volleyball.core import constants
+from slime_volleyball.core import game
+from slime_volleyball import rendering
+from slime_volleyball.baseline_policy import BaselinePolicy
+from slime_volleyball.core import utils
 
 np.set_printoptions(threshold=20, precision=3, suppress=True, linewidth=200)
 
@@ -40,7 +41,7 @@ class Actions:
     Right = 5
 
 
-class SlimeVolleyEnv(env.MultiAgentEnv):
+class SlimeVolleyEnv(gym.Env):
     """
     Gym wrapper for Slime Volley game.
 
@@ -63,7 +64,10 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
     for the left agent is the negative of this number.
     """
 
-    metadata = {"render.modes": ["human", "rgb_array", "state"], "video.frames_per_second": 50}
+    metadata = {
+        "render.modes": ["human", "rgb_array", "state"],
+        "video.frames_per_second": 50,
+    }
 
     action_table = [
         [0, 0, 0],  # NOOP
@@ -76,9 +80,9 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
 
     from_pixels = False
     survival_bonus = False  # Depreciated: augment reward, easier to train
-    multiagent = True  # optional args anyways
+    multiagent = False  # optional args anyways
 
-    def __init__(self, config: dict[str, ...] | None = None):
+    def __init__(self, config: dict[str, typing.Any] | None = None):
         super(SlimeVolleyEnv, self).__init__()
 
         """
@@ -110,17 +114,24 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
         if self.from_pixels:
             constants.setPixelObsMode()
             self.observation_space = spaces.Box(
-                low=0, high=255, shape=(constants.PIXEL_HEIGHT, constants.PIXEL_WIDTH, 3), dtype=np.uint8
+                low=0,
+                high=255,
+                shape=(constants.PIXEL_HEIGHT, constants.PIXEL_WIDTH, 3),
+                dtype=np.uint8,
             )
         else:
             high = np.array([np.finfo(np.float32).max] * 12)
-            self.observation_space = spaces.Dict({"obs": spaces.Box(-high, high, shape=(12,))})
+            self.observation_space = spaces.Dict(
+                {"obs": spaces.Box(-high, high, shape=(12,))}
+            )
 
         self.canvas = None
         self.previous_rgbarray = None
 
         self.game = game.SlimeVolleyGame(self.np_random)
-        self.ale = self.game.agent_right  # for compatibility for some models that need the self.ale.lives() function
+        self.ale = (
+            self.game.agent_right
+        )  # for compatibility for some models that need the self.ale.lives() function
 
         self.policy = BaselinePolicy()  # the “bad guy”
 
@@ -130,13 +141,18 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
         self.otherAction = None
 
     def seed(self, seed=None):
-        self.ale = self.game.agent_right  # for compatibility for some models that need the self.ale.lives() function
+        self.ale = (
+            self.game.agent_right
+        )  # for compatibility for some models that need the self.ale.lives() function
 
     def get_obs(self):
         if self.from_pixels:
             obs = self.render(mode="state")
             self.canvas = obs
-            return {"agent_left": cv2.flip(obs, 1), "agent_right": obs}  # always observe from the same angle
+            return {
+                "agent_left": cv2.flip(obs, 1),
+                "agent_right": obs,
+            }  # always observe from the same angle
 
         return {
             "agent_left": {"obs": self.game.agent_left.get_observation()},
@@ -147,7 +163,9 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
         # convert discrete action n into the actual triplet action
         if n is None:
             return n
-        if isinstance(n, (list, tuple, np.ndarray)):  # original input for some reason, just leave it:
+        if isinstance(
+            n, (list, tuple, np.ndarray)
+        ):  # original input for some reason, just leave it:
             if len(n) == 3:
                 return n
         assert (int(n) == n) and (n >= 0) and (n < 6)
@@ -163,8 +181,12 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
 
         # left_agent_action = actions.get("agent_left", self.policy.predict(self.game.agent_left.get_observation()))
         # right_agent_action = actions.get("agent_right", self.policy.predict(self.game.agent_right.get_observation()))
-        left_agent_action = self.discrete_to_box(actions.get("agent_left"))
-        right_agent_action = self.discrete_to_box(actions.get("agent_right"))
+        if type(actions) == dict:
+            left_agent_action = self.discrete_to_box(actions.get("agent_left"))
+            right_agent_action = self.discrete_to_box(actions.get("agent_right"))
+        else:
+            left_agent_action = None
+            right_agent_action = self.discrete_to_box(actions)
 
         if self.otherAction is not None:
             left_agent_action = self.discrete_to_box(self.other_action)
@@ -178,7 +200,10 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
 
         reward_right = self.game.step()
         # include survival bonus
-        rewards = {"agent_left": -reward_right + 0.01, "agent_right": reward_right + 0.01}
+        rewards = {
+            "agent_left": -reward_right + 0.01,
+            "agent_right": reward_right + 0.01,
+        }
 
         obs = self.get_obs()
 
@@ -222,9 +247,11 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
     def checkViewer(self):
         # for opengl viewer
         if self.viewer is None:
-            self.viewer = rendering.SimpleImageViewer(maxwidth=2160)  # macbook pro resolution
+            self.viewer = rendering.SimpleImageViewer(
+                # maxwidth=2160
+            )  # macbook pro resolution
 
-    def render(self, mode="human", close=False):
+    def render(self, mode="rgb_array", close=False):
         if constants.PIXEL_MODE:
             if self.canvas is not None:  # already rendered
                 rgb_array = self.canvas
@@ -232,7 +259,7 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
                 if mode == "rgb_array" or mode == "human":
                     self.checkViewer()
                     larger_canvas = utils.upsize_image(rgb_array)
-                    self.viewer.imshow(larger_canvas)
+                    # self.viewer.imshow(larger_canvas)  # TODO: re-enable to play
                     if mode == "rgb_array":
                         return larger_canvas
                     else:
@@ -254,7 +281,9 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
 
         else:  # pyglet renderer
             if self.viewer is None:
-                self.viewer = rendering.Viewer(constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT)
+                self.viewer = rendering.Viewer(
+                    constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT
+                )
 
             self.game.display(self.viewer)
             return self.viewer.render(return_rgb_array=mode == "rgb_array")
@@ -269,4 +298,7 @@ class SlimeVolleyPixelEnv(SlimeVolleyEnv):
 
 
 register(id="SlimeVolley-v0", entry_point="slimevolleygym.slimevolley:SlimeVolleyEnv")
-register(id="SlimeVolleyPixel-v0", entry_point="slimevolleygym.slimevolley:SlimeVolleyPixelEnv")
+register(
+    id="SlimeVolleyPixel-v0",
+    entry_point="slimevolleygym.slimevolley:SlimeVolleyPixelEnv",
+)

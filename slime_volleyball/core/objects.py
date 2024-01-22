@@ -3,9 +3,9 @@ import math
 import cv2
 import numpy as np
 
-from envs.slime_volleyball.core import constants
-from envs.slime_volleyball import rendering
-from envs.slime_volleyball.core import utils
+from examples.slime_volleyball.slime_volleyball.core import constants
+from examples.slime_volleyball.slime_volleyball import rendering
+from examples.slime_volleyball.slime_volleyball.core import utils
 
 
 def make_half_circle(radius=10, res=20, filled=True):
@@ -30,12 +30,21 @@ def _add_attrs(geom, color):
 
 def create_canvas(canvas, c):
     if constants.PIXEL_MODE:
-        result = np.ones((constants.WINDOW_HEIGHT, constants.WINDOW_WIDTH, 3), dtype=np.uint8)
+        result = np.ones(
+            (constants.WINDOW_HEIGHT, constants.WINDOW_WIDTH, 3), dtype=np.uint8
+        )
         for channel in range(3):
             result[:, :, channel] *= c[channel]
         return result
     else:
-        rect(canvas, 0, 0, constants.WINDOW_WIDTH, -constants.WINDOW_HEIGHT, color=constants.BACKGROUND_COLOR)
+        rect(
+            canvas,
+            0,
+            0,
+            constants.WINDOW_WIDTH,
+            -constants.WINDOW_HEIGHT,
+            color=constants.BACKGROUND_COLOR,
+        )
         return canvas
 
 
@@ -52,7 +61,9 @@ def rect(canvas, x, y, width, height, color):
         )
         return canvas
     else:
-        box = rendering.make_polygon([(0, 0), (0, -height), (width, -height), (width, 0)])
+        box = rendering.make_polygon(
+            [(0, 0), (0, -height), (width, -height), (width, 0)]
+        )
         trans = rendering.Transform()
         trans.set_translation(x, y)
         _add_attrs(box, color)
@@ -89,7 +100,12 @@ def circle(canvas, x, y, r, color):
     """Processing style function to make it easy to port p5.js program to python"""
     if constants.PIXEL_MODE:
         return cv2.circle(
-            canvas, (round(x), round(constants.WINDOW_HEIGHT - y)), round(r), color, thickness=-1, lineType=cv2.LINE_AA
+            canvas,
+            (round(x), round(constants.WINDOW_HEIGHT - y)),
+            round(r),
+            color,
+            thickness=-1,
+            lineType=cv2.LINE_AA,
         )
     else:
         geom = rendering.make_circle(r, res=40)
@@ -115,7 +131,13 @@ class Particle:
         self.c = c
 
     def display(self, canvas):
-        return circle(canvas, utils.toX(self.x), utils.toY(self.y), utils.toP(self.r), color=self.c)
+        return circle(
+            canvas,
+            utils.toX(self.x),
+            utils.toY(self.y),
+            utils.toP(self.r),
+            color=self.c,
+        )
 
     def move(self):
         self.prev_x = self.x
@@ -153,7 +175,11 @@ class Particle:
             and (self.y <= constants.REF_WALL_HEIGHT)
         ):
             self.vx *= -constants.FRICTION
-            self.x = constants.REF_WALL_WIDTH / 2 + self.r + constants.NUDGE * constants.TIMESTEP
+            self.x = (
+                constants.REF_WALL_WIDTH / 2
+                + self.r
+                + constants.NUDGE * constants.TIMESTEP
+            )
 
         if (
             (self.x >= (-constants.REF_WALL_WIDTH / 2 - self.r))
@@ -161,7 +187,11 @@ class Particle:
             and (self.y <= constants.REF_WALL_HEIGHT)
         ):
             self.vx *= -constants.FRICTION
-            self.x = -constants.REF_WALL_WIDTH / 2 - self.r - constants.NUDGE * constants.TIMESTEP
+            self.x = (
+                -constants.REF_WALL_WIDTH / 2
+                - self.r
+                - constants.NUDGE * constants.TIMESTEP
+            )
         return 0
 
     def get_dist2(self, p):  # returns distance squared from p
@@ -171,7 +201,9 @@ class Particle:
 
     def is_colliding(self, p):  # returns true if it is colliding w/ p
         r = self.r + p.r
-        return r * r > self.get_dist2(p)  # if distance is less than total radius, then colliding.
+        return r * r > self.get_dist2(
+            p
+        )  # if distance is less than total radius, then colliding.
 
     def bounce(self, p):  # bounce two balls that have collided (this and that)
         abx = self.x - p.x
