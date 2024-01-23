@@ -198,6 +198,10 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
         """
         self.t += 1
 
+        if not isinstance(actions, dict):
+            # bot will be agent left
+            actions = {"agent_right": actions}
+
         left_agent_action = self.discrete_to_box(actions.get("agent_left"))
         right_agent_action = self.discrete_to_box(actions.get("agent_right"))
 
