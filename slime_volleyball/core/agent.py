@@ -12,7 +12,7 @@ from slime_volleyball.core import utils
 class Agent:
     """keeps track of the agent in the game. note this is not the policy network"""
 
-    def __init__(self, dir, x, y, c):
+    def __init__(self, dir, x, y, c, standardize_actions=False):
         self.dir = dir  # -1 means left, 1 means right player for symmetry.
         self.x = x
         self.y = y
@@ -26,6 +26,7 @@ class Agent:
         self.emotion = "happy"
         # hehe...
         self.life = constants.MAXLIVES
+        self.standardize_actions = standardize_actions
 
     def lives(self):
         return self.life
@@ -38,7 +39,8 @@ class Agent:
         return [action[1], action[0], action[2]]
 
     def set_action(self, action):
-        action = self.standardize_action(action)
+        if self.standardize_actions:
+            action = self.standardize_action(action)
 
         forward = False
         backward = False

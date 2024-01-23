@@ -80,6 +80,7 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
         "from_pixels": False,
         "survival_bonus": False,
         "max_steps": 3000,
+        "standardize_actions": False,
     }
 
     def __init__(self, config: dict[str, typing.Any] | None = None):
@@ -109,6 +110,9 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
         self.from_pixels = config.get("from_pixels", self.default_config["from_pixels"])
         self.survival_bonus = config.get(
             "survival_bonus", self.default_config["survival_bonus"]
+        )
+        self.standardize_actions = config.get(
+            "standardize_actions", self.default_config["standardize_actions"]
         )
 
         if self.from_pixels:
