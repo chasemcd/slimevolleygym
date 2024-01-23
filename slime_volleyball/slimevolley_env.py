@@ -83,8 +83,6 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
     }
 
     def __init__(self, config: dict[str, typing.Any] | None = None):
-        super(SlimeVolleyEnv, self).__init__()
-
         """
         Reward modes:
 
@@ -105,7 +103,7 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
         if config is None:
             config = self.default_config
 
-        self.agent_ids = ["agent_left", "agent_right"]
+        self._agent_ids = set(["agent_left", "agent_right"])
         self.t = 0
         self.max_steps = config.get("max_steps", 3000)
         self.from_pixels = config.get("from_pixels", self.default_config["from_pixels"])
@@ -113,11 +111,9 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
             "survival_bonus", self.default_config["survival_bonus"]
         )
 
-        self.action_space = spaces.Discrete(len(self.action_table))
-
         if self.from_pixels:
             constants.setPixelObsMode()
-            self.observation_space = spaces.Box(
+            observation_space = spaces.Box(
                 low=0,
                 high=255,
                 shape=(constants.PIXEL_HEIGHT, constants.PIXEL_WIDTH, 3),
@@ -125,9 +121,19 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
             )
         else:
             high = np.array([np.finfo(np.float32).max] * 12)
-            self.observation_space = spaces.Dict(
+            observation_space = spaces.Dict(
                 {"obs": spaces.Box(-high, high, shape=(12,))}
             )
+
+        self.action_space = spaces.Dict(
+            {
+                agent_id: spaces.Discrete(len(self.action_table))
+                for agent_id in self._agent_ids
+            }
+        )
+        self.observation_space = spaces.Dict(
+            {agent_id: observation_space for agent_id in self._agent_ids}
+        )
 
         self.canvas = None
         self.previous_rgbarray = None
@@ -143,6 +149,8 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
 
         # another avenue to override the built-in AI's action, going past many env wraps:
         self.otherAction = None
+
+        super(SlimeVolleyEnv, self).__init__()
 
     def seed(self, seed=None):
         self.ale = (
@@ -177,23 +185,13 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
 
     def step(self, actions):
         """
-        baseAction is only used if multiagent mode is True
         note: although the action space is multi-binary, float vectors
         are fine (refer to setAction() to see how they get interpreted)
         """
         self.t += 1
 
-        # left_agent_action = actions.get("agent_left", self.policy.predict(self.game.agent_left.get_observation()))
-        # right_agent_action = actions.get("agent_right", self.policy.predict(self.game.agent_right.get_observation()))
-        if type(actions) == dict:
-            left_agent_action = self.discrete_to_box(actions.get("agent_left"))
-            right_agent_action = self.discrete_to_box(actions.get("agent_right"))
-        else:
-            left_agent_action = None
-            right_agent_action = self.discrete_to_box(actions)
-
-        if self.otherAction is not None:
-            left_agent_action = self.discrete_to_box(self.other_action)
+        left_agent_action = self.discrete_to_box(actions.get("agent_left"))
+        right_agent_action = self.discrete_to_box(actions.get("agent_right"))
 
         if left_agent_action is None:  # override baseline policy
             obs = self.game.agent_left.get_observation()
@@ -205,33 +203,28 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
         reward_right = self.game.step()
         # include survival bonus
         rewards = {
-            "agent_left": -reward_right + 0.01,
-            "agent_right": reward_right + 0.01,
+            "agent_left": -reward_right,
+            "agent_right": reward_right,
         }
 
         obs = self.get_obs()
 
         terminateds, truncateds = self.get_terminateds_truncateds()
 
-        # info = {
-        #     "agent_right_lives": self.game.agent_right.lives(),
-        #     "agent_left_lives": self.game.agent_left.lives(),
-        # }
-
         return obs, rewards, terminateds, truncateds, {}
 
     def get_terminateds_truncateds(self) -> tuple[dict[str, bool], dict[str, bool]]:
-        terminateds = {a_id: False for a_id in self.agent_ids}
-        truncateds = {a_id: False for a_id in self.agent_ids}
+        terminateds = {a_id: False for a_id in self._agent_ids}
+        truncateds = {a_id: False for a_id in self._agent_ids}
 
         if self.t >= self.max_steps:
-            truncateds = {a_id: True for a_id in self.agent_ids}
+            truncateds = {a_id: True for a_id in self._agent_ids}
             truncateds["__all__"] = True
         else:
             truncateds["__all__"] = False
 
         if self.game.agent_left.life <= 0 or self.game.agent_right.life <= 0:
-            terminateds = {a_id: True for a_id in self.agent_ids}
+            terminateds = {a_id: True for a_id in self._agent_ids}
             terminateds["__all__"] = True
         else:
             terminateds["__all__"] = False

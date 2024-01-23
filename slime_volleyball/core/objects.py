@@ -310,4 +310,4 @@ class RelativeState:
             self.ovy,
         ]
         result = np.array(result) / self.scale_factor
-        return result
+        return result.astype(np.float32)
