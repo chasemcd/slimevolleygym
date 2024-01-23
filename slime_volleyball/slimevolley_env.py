@@ -187,6 +187,14 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
         assert (int(n) == n) and (n >= 0) and (n < 6)
         return self.action_table[n]
 
+    def invert_action(action: np.ndarray | list) -> list:
+        """
+        used to invert the baseline policy action so that the human can use the correct
+        controls on both sides.
+        """
+        left, up, right = action
+        return [right, up, left]
+
     def step(self, actions):
         """
         note: although the action space is multi-binary, float vectors
@@ -194,12 +202,17 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
         """
         self.t += 1
 
+        if not isinstance(actions, dict):
+            # bot will be agent left
+            actions = {"agent_right": actions}
+
         left_agent_action = self.discrete_to_box(actions.get("agent_left"))
         right_agent_action = self.discrete_to_box(actions.get("agent_right"))
 
         if left_agent_action is None:  # override baseline policy
             obs = self.game.agent_left.get_observation()
             left_agent_action = self.policy.predict(obs)
+            left_agent_action = self.invert_action(left_agent_action)
 
         self.game.agent_left.set_action(left_agent_action)
         self.game.agent_right.set_action(right_agent_action)
