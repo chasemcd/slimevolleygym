@@ -19,7 +19,7 @@ from gymnasium import spaces
 from gymnasium.envs.registration import register
 import numpy as np
 import cv2  # installed with gym anyways
-
+from ray.rllib import env
 
 from slime_volleyball.core import constants
 from slime_volleyball.core import game
@@ -39,7 +39,7 @@ class Actions:
     Right = 5
 
 
-class SlimeVolleyEnv(gym.Env):
+class SlimeVolleyEnv(env.MultiAgentEnv):
     """
     Gym wrapper for Slime Volley game.
 
