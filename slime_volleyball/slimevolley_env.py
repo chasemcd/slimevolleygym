@@ -78,7 +78,7 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
 
     default_config = {
         "from_pixels": False,
-        "survival_bonus": False,
+        "survival_reward": False,
         "max_steps": 3000,
     }
 
@@ -107,8 +107,8 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
         self.t = 0
         self.max_steps = config.get("max_steps", 3000)
         self.from_pixels = config.get("from_pixels", self.default_config["from_pixels"])
-        self.survival_bonus = config.get(
-            "survival_bonus", self.default_config["survival_bonus"]
+        self.survival_reward = config.get(
+            "survival_reward", self.default_config["survival_reward"]
         )
 
         if self.from_pixels:
@@ -206,11 +206,12 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
         self.game.agent_right.set_action(right_agent_action)
 
         reward_right = self.game.step()
+        survival_reward = 0.1 if self.survival_reward else 0.0
 
         # include survival bonus
         rewards = {
-            "agent_left": -reward_right,
-            "agent_right": reward_right,
+            "agent_left": -reward_right + survival_reward,
+            "agent_right": reward_right + survival_reward,
         }
 
         obs = self.get_obs()
