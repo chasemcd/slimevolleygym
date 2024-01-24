@@ -16,7 +16,7 @@ class SlimeVolleyGame:
     can be used in various settings, such as ai vs ai, ai vs human, human vs human
     """
 
-    def __init__(self, np_random: np.random.Generator, standardize_actions=False):
+    def __init__(self, np_random: np.random.Generator):
         self.ball = None
         self.ground = None
         self.fence = None
@@ -25,7 +25,6 @@ class SlimeVolleyGame:
         self.agent_right = None
         self.delay_screen = None
         self.np_random = np_random
-        self.standardize_actions = standardize_actions
         self.reset()
 
     def reset(self):
@@ -57,14 +56,12 @@ class SlimeVolleyGame:
             -constants.REF_W / 4,
             1.5,
             c=constants.AGENT_LEFT_COLOR,
-            standardize_actions=self.standardize_actions,
         )
         self.agent_right = Agent(
             1,
             constants.REF_W / 4,
             1.5,
             c=constants.AGENT_RIGHT_COLOR,
-            standardize_actions=self.standardize_actions,
         )
         self.agent_left.update_state(self.ball, self.agent_right)
         self.agent_right.update_state(self.ball, self.agent_left)
