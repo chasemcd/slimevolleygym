@@ -206,7 +206,7 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
         self.game.agent_right.set_action(right_agent_action)
 
         reward_right = self.game.step()
-        survival_reward = 0.1 if self.survival_reward else 0.0
+        survival_reward = 0.01 if self.survival_reward else 0.0
 
         # include survival bonus
         rewards = {
