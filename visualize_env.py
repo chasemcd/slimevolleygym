@@ -67,7 +67,7 @@ if __name__ == "__main__":
 
     policy = BaselinePolicy()  # defaults to use RNN Baseline for player
 
-    env = SlimeVolleyEnv()
+    env = SlimeVolleyEnv({"survival_reward": True})
 
     if constants.RENDER_MODE:
         env.render()
