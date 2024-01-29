@@ -188,6 +188,11 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
         assert (int(n) == n) and (n >= 0) and (n < 6)
         return self.action_table[n]
 
+    @staticmethod
+    def invert_action(action: list) -> list:
+        left, up, right = action
+        return [right, up, left]
+
     def step(self, actions):
         """
         note: although the action space is multi-binary, float vectors
