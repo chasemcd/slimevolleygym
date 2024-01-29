@@ -80,6 +80,8 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
         "from_pixels": False,
         "survival_bonus": False,
         "max_steps": 3000,
+        # if true, LHS actions are swapped to be intuitive for humans, otherwise directions are swapped
+        "human_inputs": False,
     }
 
     def __init__(self, config: dict[str, typing.Any] | None = None):
@@ -109,6 +111,9 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
         self.from_pixels = config.get("from_pixels", self.default_config["from_pixels"])
         self.survival_bonus = config.get(
             "survival_bonus", self.default_config["survival_bonus"]
+        )
+        self.human_inputs = config.get(
+            "human_inputs", self.default_config["human_inputs"]
         )
 
         if self.from_pixels:
@@ -208,6 +213,9 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
         if left_agent_action is None:  # override baseline policy
             obs = self.game.agent_left.get_observation()
             left_agent_action = self.policy.predict(obs)
+            left_agent_action = self.invert_action(left_agent_action)
+
+        if self.human_inputs:
             left_agent_action = self.invert_action(left_agent_action)
 
         self.game.agent_left.set_action(left_agent_action)
