@@ -78,7 +78,7 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
 
     default_config = {
         "from_pixels": False,
-        "survival_bonus": False,
+        "survival_reward": False,
         "max_steps": 3000,
         # if true, LHS actions are swapped to be intuitive for humans, otherwise directions are swapped
         "human_inputs": False,
@@ -109,8 +109,8 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
         self.t = 0
         self.max_steps = config.get("max_steps", 3000)
         self.from_pixels = config.get("from_pixels", self.default_config["from_pixels"])
-        self.survival_bonus = config.get(
-            "survival_bonus", self.default_config["survival_bonus"]
+        self.survival_reward = config.get(
+            "survival_reward", self.default_config["survival_reward"]
         )
         self.human_inputs = config.get(
             "human_inputs", self.default_config["human_inputs"]
@@ -188,14 +188,6 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
         assert (int(n) == n) and (n >= 0) and (n < 6)
         return self.action_table[n]
 
-    def invert_action(action: np.ndarray | list) -> list:
-        """
-        used to invert the baseline policy action so that the human can use the correct
-        controls on both sides.
-        """
-        left, up, right = action
-        return [right, up, left]
-
     def step(self, actions):
         """
         note: although the action space is multi-binary, float vectors
@@ -203,8 +195,9 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
         """
         self.t += 1
 
-        if not isinstance(actions, dict):
-            # bot will be agent left
+        # If it's being treated as a single agent env, right agent is being
+        # controlled and self.policy will control the left.
+        if isinstance(actions, int):
             actions = {"agent_right": actions}
 
         left_agent_action = self.discrete_to_box(actions.get("agent_left"))
@@ -213,7 +206,6 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
         if left_agent_action is None:  # override baseline policy
             obs = self.game.agent_left.get_observation()
             left_agent_action = self.policy.predict(obs)
-            left_agent_action = self.invert_action(left_agent_action)
 
         if self.human_inputs:
             left_agent_action = self.invert_action(left_agent_action)
@@ -222,10 +214,12 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
         self.game.agent_right.set_action(right_agent_action)
 
         reward_right = self.game.step()
+        survival_reward = 0.01 if self.survival_reward else 0.0
+
         # include survival bonus
         rewards = {
-            "agent_left": -reward_right,
-            "agent_right": reward_right,
+            "agent_left": -reward_right + survival_reward,
+            "agent_right": reward_right + survival_reward,
         }
 
         obs = self.get_obs()

@@ -52,10 +52,16 @@ class SlimeVolleyGame:
             0, constants.REF_W / 4, ball_vx, ball_vy, 0.5, c=constants.BALL_COLOR
         )
         self.agent_left = Agent(
-            -1, -constants.REF_W / 4, 1.5, c=constants.AGENT_LEFT_COLOR
+            -1,
+            -constants.REF_W / 4,
+            1.5,
+            c=constants.AGENT_LEFT_COLOR,
         )
         self.agent_right = Agent(
-            1, constants.REF_W / 4, 1.5, c=constants.AGENT_RIGHT_COLOR
+            1,
+            constants.REF_W / 4,
+            1.5,
+            c=constants.AGENT_RIGHT_COLOR,
         )
         self.agent_left.update_state(self.ball, self.agent_right)
         self.agent_right.update_state(self.ball, self.agent_left)
