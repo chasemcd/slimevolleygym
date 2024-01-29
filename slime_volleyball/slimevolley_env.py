@@ -190,8 +190,8 @@ class SlimeVolleyEnv(env.MultiAgentEnv):
 
     @staticmethod
     def invert_action(action: list) -> list:
-        left, up, right = action
-        return [right, up, left]
+        left, right, up = action
+        return [right, left, up]
 
     def step(self, actions):
         """
