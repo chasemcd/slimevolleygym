@@ -67,7 +67,7 @@ if __name__ == "__main__":
 
     policy = BaselinePolicy()  # defaults to use RNN Baseline for player
 
-    env = SlimeVolleyEnv({"survival_reward": True})
+    env = SlimeVolleyEnv({"survival_reward": True, "human_actions": False})
 
     if constants.RENDER_MODE:
         env.render()
@@ -87,14 +87,12 @@ if __name__ == "__main__":
         else:
             right_action = policy.predict(obs_right)
 
-        # if otherManualMode:
-        #     left_action = otherManualAction
-        # else:
-        #     left_action = policy.predict(obs_left)
+        if otherManualMode:
+            left_action = otherManualAction
+        else:
+            left_action = policy.predict(obs_left)
 
-        actions = {
-            "agent_right": right_action
-        }  # {"agent_left": left_action, "agent_right": right_action}
+        actions = {"agent_left": left_action, "agent_right": right_action}
         obs, reward, terminateds, truncateds, _ = env.step(actions)
 
         # if any([r > 0 or r < 0 for r in reward.values()]):
