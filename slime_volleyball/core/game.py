@@ -99,14 +99,15 @@ class SlimeVolleyGame:
         if result != 0:
             if constants.MAXLIVES > 1:
                 self.new_match()  # not reset, but after a point is scored
-                if result < 0:  # baseline agent won
-                    self.agent_left.emotion = "happy"
-                    self.agent_right.emotion = "sad"
-                    self.agent_right.life -= 1
-                else:
-                    self.agent_left.emotion = "sad"
-                    self.agent_right.emotion = "happy"
-                    self.agent_left.life -= 1
+
+            if result < 0:  # baseline agent won
+                self.agent_left.emotion = "happy"
+                self.agent_right.emotion = "sad"
+                self.agent_right.life -= 1
+            else:
+                self.agent_left.emotion = "sad"
+                self.agent_right.emotion = "happy"
+                self.agent_left.life -= 1
             return result
 
         # update internal states (the last thing to do)
