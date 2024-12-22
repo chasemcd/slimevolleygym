@@ -83,7 +83,11 @@ class SlimeVolleyEnv(gym.Env):
         "human_inputs": False,
     }
 
-    def __init__(self, config: dict[str, typing.Any] | None = None):
+    def __init__(
+        self,
+        config: dict[str, typing.Any] | None = None,
+        render_mode: str | None = None,
+    ):
         """
         Reward modes:
 
@@ -107,7 +111,9 @@ class SlimeVolleyEnv(gym.Env):
         self._agent_ids = set(["agent_left", "agent_right"])
         self.t = 0
         self.max_steps = config.get("max_steps", 3000)
-        self.from_pixels = config.get("from_pixels", self.default_config["from_pixels"])
+        self.from_pixels = config.get(
+            "from_pixels", self.default_config["from_pixels"]
+        )
         self.survival_reward = config.get(
             "survival_reward", self.default_config["survival_reward"]
         )
@@ -153,6 +159,8 @@ class SlimeVolleyEnv(gym.Env):
 
         # another avenue to override the built-in AI's action, going past many env wraps:
         self.otherAction = None
+
+        self.render_mode = render_mode
 
         super(SlimeVolleyEnv, self).__init__()
 
@@ -232,7 +240,9 @@ class SlimeVolleyEnv(gym.Env):
 
         return obs, rewards, terminateds, truncateds, {}
 
-    def get_terminateds_truncateds(self) -> tuple[dict[str, bool], dict[str, bool]]:
+    def get_terminateds_truncateds(
+        self,
+    ) -> tuple[dict[str, bool], dict[str, bool]]:
         terminateds = {a_id: False for a_id in self._agent_ids}
         truncateds = {a_id: False for a_id in self._agent_ids}
 
@@ -255,7 +265,9 @@ class SlimeVolleyEnv(gym.Env):
         self.game.reset()
 
     def reset(
-        self, seed: int | None = None, options: dict[str, typing.Any] | None = None
+        self,
+        seed: int | None = None,
+        options: dict[str, typing.Any] | None = None,
     ) -> tuple[dict[str, np.array], dict[str, typing.Any]]:
         self.init_game_state()
         return self.get_obs(), {}
@@ -267,7 +279,8 @@ class SlimeVolleyEnv(gym.Env):
                 # maxwidth=2160
             )  # macbook pro resolution
 
-    def render(self, mode="rgb_array", close=False):
+    def render(self):
+        mode = self.render_mode
         if constants.PIXEL_MODE:
             if self.canvas is not None:  # already rendered
                 rgb_array = self.canvas
@@ -313,7 +326,9 @@ class SlimeVolleyPixelEnv(SlimeVolleyEnv):
     from_pixels = True
 
 
-register(id="SlimeVolley-v0", entry_point="slimevolleygym.slimevolley:SlimeVolleyEnv")
+register(
+    id="SlimeVolley-v0", entry_point="slimevolleygym.slimevolley:SlimeVolleyEnv"
+)
 register(
     id="SlimeVolleyPixel-v0",
     entry_point="slimevolleygym.slimevolley:SlimeVolleyPixelEnv",
