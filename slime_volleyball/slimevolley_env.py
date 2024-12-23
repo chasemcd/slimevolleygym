@@ -22,9 +22,16 @@ import cv2  # installed with gym anyways
 
 from slime_volleyball.core import constants
 from slime_volleyball.core import game
-from slime_volleyball import rendering
 from slime_volleyball.baseline_policy import BaselinePolicy
 from slime_volleyball.core import utils
+
+
+try:
+    from slime_volleyball import rendering
+except ImportError as e:
+    print(
+        f"Unable to import rendering. This means you won't be able to render the game: {e}"
+    )
 
 np.set_printoptions(threshold=20, precision=3, suppress=True, linewidth=200)
 

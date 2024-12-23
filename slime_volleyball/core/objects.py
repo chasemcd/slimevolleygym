@@ -4,8 +4,14 @@ import cv2
 import numpy as np
 
 from slime_volleyball.core import constants
-from slime_volleyball import rendering
 from slime_volleyball.core import utils
+
+try:
+    from slime_volleyball import rendering
+except ImportError as e:
+    print(
+        f"Unable to import rendering. This means you won't be able to render the game: {e}"
+    )
 
 
 def make_half_circle(radius=10, res=20, filled=True):
@@ -152,22 +158,34 @@ class Particle:
     def check_edges(self):
         if self.x <= (self.r - constants.REF_W / 2):
             self.vx *= -constants.FRICTION
-            self.x = self.r - constants.REF_W / 2 + constants.NUDGE * constants.TIMESTEP
+            self.x = (
+                self.r
+                - constants.REF_W / 2
+                + constants.NUDGE * constants.TIMESTEP
+            )
 
         if self.x >= (constants.REF_W / 2 - self.r):
             self.vx *= -constants.FRICTION
-            self.x = constants.REF_W / 2 - self.r - constants.NUDGE * constants.TIMESTEP
+            self.x = (
+                constants.REF_W / 2
+                - self.r
+                - constants.NUDGE * constants.TIMESTEP
+            )
 
         if self.y <= (self.r + constants.REF_U):
             self.vy *= -constants.FRICTION
-            self.y = self.r + constants.REF_U + constants.NUDGE * constants.TIMESTEP
+            self.y = (
+                self.r + constants.REF_U + constants.NUDGE * constants.TIMESTEP
+            )
             if self.x <= 0:
                 return -1
             else:
                 return 1
         if self.y >= (constants.REF_H - self.r):
             self.vy *= -constants.FRICTION
-            self.y = constants.REF_H - self.r - constants.NUDGE * constants.TIMESTEP
+            self.y = (
+                constants.REF_H - self.r - constants.NUDGE * constants.TIMESTEP
+            )
         # fence:
         if (
             (self.x <= (constants.REF_WALL_WIDTH / 2 + self.r))
