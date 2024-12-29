@@ -126,7 +126,13 @@ class Agent:
         obs = self.state.get_observation()
         if boost:
             obs = np.append(
-                obs, [self.powerups_available, self.powered_up_timer]
+                obs,
+                [
+                    self.powerups_available,
+                    self.powered_up_timer,
+                    self.state.opponent_powerups_available,
+                    self.state.opponent_powered_up_timer,
+                ],
             )
 
         return obs

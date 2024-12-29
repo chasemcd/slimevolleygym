@@ -118,9 +118,9 @@ class SlimeVolleyBoostEnv(SlimeVolleyEnv):
                 dtype=np.uint8,
             )
         else:
-            high = np.array([np.finfo(np.float32).max] * 13)
+            high = np.array([np.finfo(np.float32).max] * 16)
             observation_space = spaces.Dict(
-                {"obs": spaces.Box(-high, high, shape=(13,))}
+                {"obs": spaces.Box(-high, high, shape=(16,))}
             )
 
         self.action_space = spaces.Dict(
@@ -229,5 +229,7 @@ class SlimeVolleyBoostEnv(SlimeVolleyEnv):
         obs = self.get_obs()
 
         terminateds, truncateds = self.get_terminateds_truncateds()
+
+        print(obs["agent_right"]["obs"])
 
         return obs, rewards, terminateds, truncateds, {}
