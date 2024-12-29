@@ -49,7 +49,12 @@ class SlimeVolleyGame:
         ball_vx = self.np_random.uniform(low=-20, high=20)
         ball_vy = self.np_random.uniform(low=10, high=25)
         self.ball = Particle(
-            0, constants.REF_W / 4, ball_vx, ball_vy, 0.5, c=constants.BALL_COLOR
+            0,
+            constants.REF_W / 4,
+            ball_vx,
+            ball_vy,
+            0.5,
+            c=constants.BALL_COLOR,
         )
         self.agent_left = Agent(
             -1,
@@ -71,7 +76,12 @@ class SlimeVolleyGame:
         ball_vx = self.np_random.uniform(low=-20, high=20)
         ball_vy = self.np_random.uniform(low=10, high=25)
         self.ball = Particle(
-            0, constants.REF_W / 4, ball_vx, ball_vy, 0.5, c=constants.BALL_COLOR
+            0,
+            constants.REF_W / 4,
+            ball_vx,
+            ball_vy,
+            0.5,
+            c=constants.BALL_COLOR,
         )
         self.delay_screen.reset()
 
@@ -87,9 +97,15 @@ class SlimeVolleyGame:
             self.ball.move()
 
         if self.ball.is_colliding(self.agent_left):
-            self.ball.bounce(self.agent_left)
+            self.ball.bounce(
+                self.agent_left,
+                factor=(1 + 0.5 * int(self.agent_left.powered_up_timer > 0)),
+            )
         if self.ball.is_colliding(self.agent_right):
-            self.ball.bounce(self.agent_right)
+            self.ball.bounce(
+                self.agent_right,
+                factor=(1 + 0.5 * int(self.agent_right.powered_up_timer > 0)),
+            )
         if self.ball.is_colliding(self.fence_stub):
             self.ball.bounce(self.fence_stub)
 

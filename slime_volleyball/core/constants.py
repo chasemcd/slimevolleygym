@@ -25,9 +25,7 @@ FACTOR = WINDOW_WIDTH / REF_W
 # (otherwise uses pyglet / opengl -> much smoother for human player)
 PIXEL_MODE = True
 PIXEL_MODE = True
-PIXEL_SCALE = (
-    4  # first render at multiple of Pixel Obs resolution, then downscale. Looks better.
-)
+PIXEL_SCALE = 4  # first render at multiple of Pixel Obs resolution, then downscale. Looks better.
 
 PIXEL_WIDTH = 84 * 2 * 1
 PIXEL_HEIGHT = 84 * 1
@@ -41,6 +39,7 @@ PIXEL_AGENT_RIGHT_COLOR = (255, 191, 0)  # AMBER
 BACKGROUND_COLOR = (11, 16, 19)
 FENCE_COLOR = (102, 56, 35)
 COIN_COLOR = FENCE_COLOR
+POWERUP_COLOR = (0, 255, 255)
 GROUND_COLOR = (116, 114, 117)
 
 

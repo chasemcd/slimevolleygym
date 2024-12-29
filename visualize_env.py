@@ -2,7 +2,12 @@ import numpy as np
 
 from slime_volleyball.core import constants
 from slime_volleyball.slimevolley_env import SlimeVolleyEnv
-from slime_volleyball.baseline_policy import BaselinePolicy
+from slime_volleyball.slimevolley_boost_env import SlimeVolleyBoostEnv
+
+# from slime_volleyball.baseline_policy import BaselinePolicy
+
+
+BOOST_MODE = True
 
 
 if __name__ == "__main__":
@@ -24,7 +29,9 @@ if __name__ == "__main__":
         from pyglet.window import key
         from time import sleep
 
-    manualAction = [0, 0, 0]  # forward, backward, jump
+    manualAction = (
+        [0, 0, 0] if not BOOST_MODE else [0, 0, 0, 0]
+    )  # forward, backward, jump
     otherManualAction = [0, 0, 0]
     manualMode = False
     otherManualMode = False
@@ -38,6 +45,8 @@ if __name__ == "__main__":
             manualAction[1] = 1
         if k == key.UP:
             manualAction[2] = 1
+        if k == key.SPACE and len(manualAction) > 3:
+            manualAction[3] = 1
         if k == key.LEFT or k == key.RIGHT or k == key.UP:
             manualMode = True
 
@@ -58,6 +67,8 @@ if __name__ == "__main__":
             manualAction[1] = 0
         if k == key.UP:
             manualAction[2] = 0
+        if k == key.SPACE and len(manualAction) > 3:
+            manualAction[3] = 0
         if k == key.D:
             otherManualAction[0] = 0
         if k == key.A:
@@ -65,54 +76,61 @@ if __name__ == "__main__":
         if k == key.W:
             otherManualAction[2] = 0
 
-    policy = BaselinePolicy()  # defaults to use RNN Baseline for player
+    # policy = BaselinePolicy()  # defaults to use RNN Baseline for player
 
-    env = SlimeVolleyEnv({"survival_reward": True, "human_actions": False})
+    if not BOOST_MODE:
+        env = SlimeVolleyEnv({"survival_reward": True, "human_actions": False})
+    else:
+        env = SlimeVolleyBoostEnv(
+            {"survival_reward": True, "human_actions": False}
+        )
 
     if constants.RENDER_MODE:
         env.render()
         env.viewer.window.on_key_press = key_press
         env.viewer.window.on_key_release = key_release
 
-    obs, _ = env.reset(seed=np.random.randint(0, 10000))
-    steps = 0
-    total_reward = 0
+    for _ in range(10):
 
-    terminateds = truncateds = {"__all__": False}
-    while not terminateds["__all__"] and not truncateds["__all__"]:
-        obs_right, obs_left = obs["agent_right"], obs["agent_left"]
+        obs, _ = env.reset(seed=np.random.randint(0, 10000))
+        steps = 0
+        total_reward = 0
 
-        if manualMode:  # override with keyboard
-            right_action = manualAction
-        else:
-            right_action = policy.predict(obs_right)
+        terminateds = truncateds = {"__all__": False}
+        while not terminateds["__all__"] and not truncateds["__all__"]:
+            obs_right, obs_left = obs["agent_right"], obs["agent_left"]
 
-        if otherManualMode:
-            left_action = otherManualAction
-        else:
-            left_action = policy.predict(obs_left)
-
-        actions = {"agent_left": left_action, "agent_right": right_action}
-        obs, reward, terminateds, truncateds, _ = env.step(actions)
-
-        # if any([r > 0 or r < 0 for r in reward.values()]):
-        #     print("reward", reward)
-        #     manualMode = False
-        #     otherManualMode = False
-
-        total_reward += reward["agent_right"]
-        steps += 1
-
-        if constants.RENDER_MODE:
-            env.render()
-            sleep(0.01)
-
-        # make the game go slower for human players to be fair to humans.
-        if manualMode or otherManualMode:
-            if constants.PIXEL_MODE:
-                sleep(0.01)
+            if manualMode:  # override with keyboard
+                right_action = manualAction
             else:
-                sleep(0.02)
+                right_action = env.action_space["agent_left"].sample()
+
+            if otherManualMode:
+                left_action = otherManualAction
+            else:
+                left_action = env.action_space["agent_left"].sample()
+
+            actions = {"agent_left": left_action, "agent_right": right_action}
+            obs, reward, terminateds, truncateds, _ = env.step(actions)
+
+            # if any([r > 0 or r < 0 for r in reward.values()]):
+            #     print("reward", reward)
+            #     manualMode = False
+            #     otherManualMode = False
+
+            total_reward += reward["agent_right"]
+            steps += 1
+
+            if constants.RENDER_MODE:
+                env.render()
+                sleep(0.01)
+
+            # make the game go slower for human players to be fair to humans.
+            if manualMode or otherManualMode:
+                if constants.PIXEL_MODE:
+                    sleep(0.01)
+                else:
+                    sleep(0.02)
 
     env.close()
     print("cumulative score", total_reward, "steps", steps)

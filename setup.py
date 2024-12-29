@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="slimevb",
-    version="0.0.2",
+    version="0.0.3",
     description="Port of David Ha's Slime volleyball for gymnasium.",
     author="Chase McDonald",
     author_email="chasemcd@andrew.cmu.edu",

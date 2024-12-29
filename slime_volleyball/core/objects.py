@@ -135,6 +135,7 @@ class Particle:
         self.vy = vy
         self.r = r
         self.c = c
+        self.speed_factor = 1
 
     def display(self, canvas):
         return circle(
@@ -223,7 +224,9 @@ class Particle:
             p
         )  # if distance is less than total radius, then colliding.
 
-    def bounce(self, p):  # bounce two balls that have collided (this and that)
+    def bounce(
+        self, p, factor=1
+    ):  # bounce two balls that have collided (this and that)
         abx = self.x - p.x
         aby = self.y - p.y
         abd = math.sqrt(abx * abx + aby * aby)
@@ -243,10 +246,12 @@ class Particle:
         uny = ny * (un * 2.0)  # added factor of 2
         ux -= unx
         uy -= uny
-        self.vx = ux + p.vx
-        self.vy = uy + p.vy
+        self.vx = (ux + p.vx) * factor
+        self.vy = (uy + p.vy) * factor
+        self.speed_factor = factor
 
     def limit_speed(self, minSpeed, maxSpeed):
+        maxSpeed *= self.speed_factor
         mag2 = self.vx * self.vx + self.vy * self.vy
         if mag2 > (maxSpeed * maxSpeed):
             mag = math.sqrt(mag2)
@@ -299,6 +304,8 @@ class RelativeState:
         self.y = 0
         self.vx = 0
         self.vy = 0
+        self.powerups_available = 0
+        self.powered_up_timer = 0
 
         # ball
         self.bx = 0
@@ -311,8 +318,10 @@ class RelativeState:
         self.oy = 0
         self.ovx = 0
         self.ovy = 0
+        self.opponent_powerups_available = 0
+        self.opponent_powered_up_timer = 0
 
-    def get_observation(self):
+    def get_observation(self, powerups=False):
         result = [
             self.x,
             self.y,
@@ -327,5 +336,10 @@ class RelativeState:
             self.ovx,
             self.ovy,
         ]
+        if powerups:
+            result.append(self.powerups_available)
+            result.append(self.powered_up_timer)
+            result.append(self.opponent_powerups_available)
+            result.append(self.opponent_powered_up_timer)
         result = np.array(result) / self.scale_factor
         return result.astype(np.float32)
