@@ -175,6 +175,15 @@ class SlimeVolleyBoostEnv(SlimeVolleyEnv):
             },
         }
 
+    def reset(
+        self,
+        seed: int | None = None,
+        options: dict[str, typing.Any] | None = None,
+    ) -> tuple[dict[str, np.array], dict[str, typing.Any]]:
+        self.init_game_state()
+
+        return self.get_obs(), {}
+
     def discrete_to_box(self, n):
         # convert discrete action n into the actual triplet action
         if n is None:
@@ -229,7 +238,5 @@ class SlimeVolleyBoostEnv(SlimeVolleyEnv):
         obs = self.get_obs()
 
         terminateds, truncateds = self.get_terminateds_truncateds()
-
-        print(obs["agent_right"]["obs"])
 
         return obs, rewards, terminateds, truncateds, {}
