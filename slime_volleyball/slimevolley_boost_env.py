@@ -93,6 +93,8 @@ class SlimeVolleyBoostEnv(SlimeVolleyEnv):
         Setting self.from_pixels to True makes the observation with multiples
         of 84, since usual atari wrappers downsample to 84x84
         """
+        super(SlimeVolleyBoostEnv, self).__init__()
+
         if config is None:
             config = self.default_config
 
@@ -149,8 +151,6 @@ class SlimeVolleyBoostEnv(SlimeVolleyEnv):
         self.otherAction = None
 
         self.render_mode = render_mode
-
-        super(SlimeVolleyBoostEnv, self).__init__()
 
     def seed(self, seed=None):
         self.ale = (
