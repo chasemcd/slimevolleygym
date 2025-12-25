@@ -17,6 +17,7 @@ import typing
 import gymnasium as gym
 from gymnasium import spaces
 from gymnasium.envs.registration import register
+from gymnasium.utils import seeding
 import numpy as np
 import cv2  # installed with gym anyways
 
@@ -155,6 +156,7 @@ class SlimeVolleyEnv(gym.Env):
         self.canvas = None
         self.previous_rgbarray = None
 
+        self.np_random, _ = seeding.np_random(config.get("seed", None))
         self.game = game.SlimeVolleyGame(self.np_random)
         self.ale = (
             self.game.agent_right
