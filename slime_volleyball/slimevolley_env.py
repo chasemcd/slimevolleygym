@@ -278,6 +278,9 @@ class SlimeVolleyEnv(gym.Env):
         seed: int | None = None,
         options: dict[str, typing.Any] | None = None,
     ) -> tuple[dict[str, np.array], dict[str, typing.Any]]:
+        if seed is not None:
+            self.np_random, _ = seeding.np_random(seed)
+            self.game = game.SlimeVolleyGame(self.np_random)
         self.init_game_state()
         return self.get_obs(), {}
 
